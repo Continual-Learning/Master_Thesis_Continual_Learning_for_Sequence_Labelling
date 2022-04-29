@@ -1,0 +1,71 @@
+gpu_list: []
+
+random_seeds:
+- 123
+
+experiment_config:
+  experiment_description: "Example model for incremental training"
+  experiment_id: '0'
+  experiment_name: example_incremental
+  label_code_opts:
+  - 'label_1'
+  - 'label_2'
+  output_path: output
+  save_epoch_checkpoints: false
+
+trainer:
+  early_stop: 1
+  epochs: 3
+  monitor: max f1_score
+  save_period: 1
+  tensorboard: true
+  verbosity: 2
+  # Changed to true here, because resumed model is now trained on different data
+  cl_incremental_training: true
+
+data_loader:
+  args:
+    batch_size: 4
+    num_workers: 2
+    shuffle: true
+    # Download optimizer from transformers repository - requires internet connection
+    tokenizer_path: bert-base-multilingual-cased
+  eval_dir: examples/data_2/eval
+  train_dir: examples/data_2/train
+  type: MultiTaskDataloader
+
+ewc: null
+
+loss:
+  args: []
+  type: WeightedBCELoss
+
+model:
+  args:
+    hidden_dropout_prob: 0.5
+    hidden_size: 768
+    model_path: bert-base-multilingual-cased
+  type: ClassificationModel
+
+optimizer:
+  args:
+    opt_configs:
+    - args:
+        amsgrad: true
+        weight_decay: 0.001
+      lr_opts:
+      - layer_type: transformer
+        lr: 1.0e-04
+      - layer_type: classifier
+        lr: 1.0e-03
+      type: Adam
+  type: ClassificationOptimizer
+
+lr_scheduler:
+  args:
+    config:
+      args:
+        gamma: 0.2
+        step_size: 3
+      type: StepLR
+  type: ClassificationScheduler

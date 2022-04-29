@@ -1,0 +1,113 @@
+gpu_list: []
+
+#random_seeds:
+#  - 123
+#  - 1234
+#  - 42
+
+experiment_config:
+  experiment_id: null
+  experiment_name: 'name-of-experiment'
+  experiment_description: ''
+  output_path: 'output'
+  train_sequential: False # False will train simultaneously on all findings
+  save_epoch_checkpoints: False
+  label_code_opts:
+    - '33737001'
+    - '59282003'
+#    - '427359005'
+#    - '50448004'
+#    - '300332007'
+#    - '87433001'
+#    - '36118008'
+#    - '26660001'
+
+trainer:
+  epochs: 3
+  save_period: 1
+  verbosity: 2
+  monitor: max f1_score
+  early_stop: 2
+  tensorboard: true
+  cl_incremental_training: true # If true, resume training from epoch one with new optimizer
+
+ewc: null
+#ewc:
+#  lambda: 0.1
+#  data_dir: example_input_data
+
+optimizer:
+  type: ClassificationOptimizer
+  args:
+    opt_configs:
+      - type: Adam
+        lr_opts:
+          - layer_type: transformer
+            lr: 0.00002
+          - layer_type: classifier
+            lr: 0.0001
+        args:
+          weight_decay: 0
+          amsgrad: true
+
+lr_scheduler:
+  type: ClassificationScheduler
+  args:
+    config:
+      type: StepLR
+      args:
+        step_size: 50
+        gamma: 0.1
+
+loss:
+  type: WeightedBCELoss
+  args: [] # Default args
+# Example KD configuration
+#  type: AdditiveMultiLoss
+#  args:
+#    loss_configs:
+#    - type: WeightedBCELoss
+#      args:
+#        filter_key: kd_sample # key in the target dict from the dataloader
+#        filter_value: false # Will be applied to samples in which kd_sample = false
+#      lambda: 1.0
+#    - type: BCELoss
+#      args:
+#        filter_key: kd_sample
+#        filter_value: true
+#      lambda: 0.1
+
+model:
+  type: ClassificationModel
+  args:
+    model_path: 'bert-base-multilingual-cased'
+    hidden_dropout_prob: 0.2
+    hidden_size: 768
+    freeze_layers:
+      - transformer # Freezes entire BERT model, only trains classifier
+      # Can have different granularities here:
+      # - transformer.embeddings
+      # - transformer.encoder.layer.2
+      # Or use TRAIN_BIAS_ONLY to freeze all weights and only train bias terms
+      # TRAIN_BIAS_ONLY
+
+data_loader:
+#  type: 'MultiTaskDataloader'
+#  train_dir: 'example_input_data'
+#  eval_dir: 'example_input_data'
+#  args:
+##    sampler: RoundRobinSamplerWithOversampling  # If sampler omitted, uses default random sampler
+#    batch_size: 8
+#    shuffle: true
+#    num_workers: 2
+#    tokenizer_path: bert-base-multilingual-cased
+### Knowledge distillation usage
+  type: 'KDDataloader'
+  train_dir: 'example_input_data'
+  eval_dir: 'example_input_data'
+  args:
+    kd_data_dir: output/evaluation/name-of-experiment/1218_115233/example_input_data/
+    batch_size: 8
+    shuffle: true
+    num_workers: 2
+    tokenizer_path: bert-base-multilingual-cased

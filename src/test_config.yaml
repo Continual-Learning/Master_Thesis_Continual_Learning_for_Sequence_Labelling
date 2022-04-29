@@ -1,0 +1,25 @@
+# The directory contains at least a .pth file and a tokenizer/ dir
+model_path: path/to/model/dir
+
+# Input data directory containing directories corresponding to each finding to evaluate
+# Expected structure:
+# + data_dir
+#   +-- aortic_dilatation
+#   |   +-- labels.csv (exactly one filename with .csv extension)
+#   |   +-- report_1.txt
+#   |   +-- ...
+#   +-- pneumothorax
+#   |   +-- ...
+#   +-- ...
+data_dir: /path/to/input/data/dir
+
+# Will be ignored of no GPUs available
+gpu_id: 0
+
+# Can be increased in case of evaluation on many CPUs or GPU
+eval_batch_size: 64
+
+# Change if needed (directory created on the fly)
+output_path: output/evaluation
+
+input_is_merged: False

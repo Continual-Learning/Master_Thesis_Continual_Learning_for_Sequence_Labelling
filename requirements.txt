@@ -1,0 +1,10 @@
+torch>=1.5.0
+numpy
+tensorboard>=1.14
+tensorboardX==2.4
+pandas
+scikit-learn
+matplotlib
+flake8
+PyYAML
+transformers==4.5.1
